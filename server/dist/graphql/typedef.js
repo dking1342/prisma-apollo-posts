@@ -8,6 +8,12 @@ const typeDefs = graphql_tag_1.gql `
         users:[User]
     }
 
+    type PostResponse{
+        errors:[FieldErrors]
+        data:Post
+        posts:[Post]
+    }
+
     type FieldErrors{
         field:String!
         message:String!
@@ -29,7 +35,7 @@ const typeDefs = graphql_tag_1.gql `
         uuid:String!
         title:String!
         body:String
-        user_id:Int
+        user_id:String
         createdAt:String!
         updatedAt:String!
     }
@@ -46,14 +52,18 @@ const typeDefs = graphql_tag_1.gql `
 
     type Query{
         getUsers:UserResponse
-        getPosts:[Post]
-        getUser(uuid:String):UserResponse
+        getUser(userId:String):UserResponse
+        getPosts:PostResponse
+        getPost(postId:String):PostResponse
     }
 
     type Mutation{
         createUser(email:String!,name:String!):UserResponse
-        deleteUser(uuid:String!):UserResponse
-        updateUser(name:String!,uuid:String!):UserResponse
+        updateUser(name:String!,userId:String!):UserResponse
+        deleteUser(userId:String!):UserResponse
+        createPost(title:String!,userId:String!,body:String):PostResponse
+        updatePost(title:String!,body:String!,postId:String!):PostResponse
+        deletePost(postId:String!):PostResponse
     }
 `;
 exports.default = typeDefs;

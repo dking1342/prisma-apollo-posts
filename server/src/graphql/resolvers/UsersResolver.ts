@@ -3,10 +3,11 @@ import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
+// types ///////////////////
 
 type UserDetails = {
     name:string;
-    uuid:string;
+    userId:string;
 }
 
 type FieldError = {
@@ -25,7 +26,11 @@ const users = {
     Query:{
         getUsers:async():Promise<UserResponse>=>{
             try {
-                const user = await prisma.user.findMany();                
+                const user = await prisma.user.findMany({
+                    include:{
+                        posts:true
+                    }
+                });                
                 
                 if(user){
                     return{
@@ -35,7 +40,7 @@ const users = {
                     return{
                         errors:[
                             {
-                                field:'fetch',
+                                field:'user',
                                 message:'no users found'
                             }
                         ]
@@ -54,12 +59,15 @@ const users = {
         },
         getUser:async(
             _:undefined,
-            {uuid}:{uuid:string}
+            {userId}:{userId:string}
         ):Promise<UserResponse>=>{
             try {
                 let user = await prisma.user.findUnique({
                     where:{
-                        uuid
+                        uuid:userId
+                    },
+                    include:{
+                        posts:true
                     }
                 });
 
@@ -70,7 +78,7 @@ const users = {
                 } else {
                     return {
                         errors:[{
-                            field:'fetch',
+                            field:'user',
                             message:'user not found'
                         }]
                     }
@@ -99,6 +107,9 @@ const users = {
                         uuid:randomUUID().toString(),
                         email:email,
                         name:name,
+                        posts:{
+                            create:[]
+                        }
                     },
                 });
 
@@ -110,7 +121,7 @@ const users = {
                     return{
                         errors:[
                             {
-                                field:'fetch',
+                                field:'user',
                                 message:'user was not created'
                             }
                         ]
@@ -134,7 +145,7 @@ const users = {
             try {
                 let currentUser = await prisma.user.findUnique({
                     where:{
-                        uuid:args.uuid
+                        uuid:args.userId
                     }
                 })
                 if(currentUser){
@@ -142,7 +153,7 @@ const users = {
 
                     let user = await prisma.user.update({
                         where:{
-                            uuid:args.uuid
+                            uuid:args.userId
                         },
                         data:{
                             name
@@ -156,7 +167,7 @@ const users = {
                     return{
                         errors:[
                             {
-                                field:'fetch',
+                                field:'user',
                                 message:'user not found'
                             }
                         ]
@@ -175,12 +186,12 @@ const users = {
         },
         deleteUser:async(
             _:undefined,
-            { uuid }:{uuid:string}
+            { userId }:{userId:string}
         ):Promise<UserResponse>=>{
             try {
                 const user = await prisma.user.delete({
                     where:{
-                        uuid
+                        uuid:userId
                     }
                 });
                 return {

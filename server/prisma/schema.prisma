@@ -10,11 +10,11 @@ generator client {
 model User {
   @@map(name:"users")
   id          Int       @id @default(autoincrement())
-  uuid        String    @default(uuid()) @unique
+  uuid        String    @unique 
   email       String    @unique
   name        String
   role        UserRole  @default(USER)
-  posts       Post[] 
+  posts       Post[]    @relation("UserPost")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @default(now()) @map("updated_at")
 }
@@ -22,11 +22,11 @@ model User {
 model Post {
   @@map("posts")
   id        Int       @id @default(autoincrement())
-  uuid      String    @default(uuid()) @unique
+  uuid      String    @unique 
   title     String
   body      String?
-  User      User      @relation(fields: [user_id], references: [id])
-  user_id   Int       @unique
+  User      User      @relation("UserPost",fields: [user_id], references: [uuid])
+  user_id   String    
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @default(now()) @map("updated_at")
 }

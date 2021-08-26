@@ -7,7 +7,11 @@ const users = {
     Query: {
         getUsers: async () => {
             try {
-                const user = await prisma.user.findMany();
+                const user = await prisma.user.findMany({
+                    include: {
+                        posts: true
+                    }
+                });
                 if (user) {
                     return {
                         users: user
@@ -17,7 +21,7 @@ const users = {
                     return {
                         errors: [
                             {
-                                field: 'fetch',
+                                field: 'user',
                                 message: 'no users found'
                             }
                         ]
@@ -35,11 +39,14 @@ const users = {
                 };
             }
         },
-        getUser: async (_, { uuid }) => {
+        getUser: async (_, { userId }) => {
             try {
                 let user = await prisma.user.findUnique({
                     where: {
-                        uuid
+                        uuid: userId
+                    },
+                    include: {
+                        posts: true
                     }
                 });
                 if (user) {
@@ -50,7 +57,7 @@ const users = {
                 else {
                     return {
                         errors: [{
-                                field: 'fetch',
+                                field: 'user',
                                 message: 'user not found'
                             }]
                     };
@@ -76,6 +83,9 @@ const users = {
                         uuid: crypto_1.randomUUID().toString(),
                         email: email,
                         name: name,
+                        posts: {
+                            create: []
+                        }
                     },
                 });
                 if (user) {
@@ -87,7 +97,7 @@ const users = {
                     return {
                         errors: [
                             {
-                                field: 'fetch',
+                                field: 'user',
                                 message: 'user was not created'
                             }
                         ]
@@ -109,14 +119,14 @@ const users = {
             try {
                 let currentUser = await prisma.user.findUnique({
                     where: {
-                        uuid: args.uuid
+                        uuid: args.userId
                     }
                 });
                 if (currentUser) {
                     let name = args.name ? args.name : currentUser.name;
                     let user = await prisma.user.update({
                         where: {
-                            uuid: args.uuid
+                            uuid: args.userId
                         },
                         data: {
                             name
@@ -130,7 +140,7 @@ const users = {
                     return {
                         errors: [
                             {
-                                field: 'fetch',
+                                field: 'user',
                                 message: 'user not found'
                             }
                         ]
@@ -148,11 +158,11 @@ const users = {
                 };
             }
         },
-        deleteUser: async (_, { uuid }) => {
+        deleteUser: async (_, { userId }) => {
             try {
                 const user = await prisma.user.delete({
                     where: {
-                        uuid
+                        uuid: userId
                     }
                 });
                 return {
