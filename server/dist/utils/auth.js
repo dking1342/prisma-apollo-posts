@@ -81,6 +81,15 @@ const authCheck = (id, context) => {
             }
         ];
     }
+    if (context.user && context.user.exp && Date.now() >= context.user.exp * 1000) {
+        valErrors = [
+            ...valErrors,
+            {
+                field: 'authorization',
+                message: 'Token has expired'
+            }
+        ];
+    }
     return {
         valid: Object.keys(valErrors).length < 1,
         valErrors

@@ -61,7 +61,7 @@ export const generateToken = (user:User) => {
     )
 }
 
-export const authCheck = (id:string,context:AuthResponse):VerificationResponse => {
+export const authCheck = (id:string | undefined,context:AuthResponse):VerificationResponse => {
     let valErrors:ErrorField[] | [] = [];
 
     if(Boolean(context.errors)){
@@ -84,6 +84,16 @@ export const authCheck = (id:string,context:AuthResponse):VerificationResponse =
             }
         ]
     }
+
+    if(context.user && context.user.exp && Date.now() >= context.user.exp * 1000){
+        valErrors = [
+            ...valErrors,
+            {
+                field:'authorization',
+                message:'Token has expired'
+            }
+        ]
+    } 
 
     return{
         valid:Object.keys(valErrors).length < 1,

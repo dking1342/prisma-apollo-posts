@@ -2,12 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
 const crypto_1 = require("crypto");
+const auth_1 = require("../../utils/auth");
 const prisma = new client_1.PrismaClient();
 const posts = {
     Query: {
         getPosts: async () => {
             try {
-                const posts = await prisma.post.findMany();
+                const posts = await prisma.post.findMany({
+                    orderBy: {
+                        createdAt: "desc"
+                    }
+                });
                 if (posts) {
                     return {
                         posts: posts
@@ -71,8 +76,25 @@ const posts = {
         },
     },
     Mutation: {
-        createPost: async (_, { title, body, userId }) => {
+        createPost: async (_, { title, body, userId }, context) => {
             try {
+                let user = await prisma.user.findUnique({ where: { uuid: userId } });
+                if (!user) {
+                    return {
+                        errors: [
+                            {
+                                field: 'user',
+                                message: 'User not found'
+                            }
+                        ]
+                    };
+                }
+                let { valid, valErrors } = auth_1.authCheck(user === null || user === void 0 ? void 0 : user.email, context);
+                if (!valid) {
+                    return {
+                        errors: valErrors
+                    };
+                }
                 const post = await prisma.post.create({
                     data: {
                         title,
@@ -112,23 +134,40 @@ const posts = {
                 };
             }
         },
-        updatePost: async (_, args) => {
+        updatePost: async (_, { title, body, postId, userId }, context) => {
             try {
+                let user = await prisma.user.findUnique({ where: { uuid: userId } });
+                if (!user) {
+                    return {
+                        errors: [
+                            {
+                                field: 'user',
+                                message: 'User not found'
+                            }
+                        ]
+                    };
+                }
+                let { valid, valErrors } = auth_1.authCheck(user === null || user === void 0 ? void 0 : user.email, context);
+                if (!valid) {
+                    return {
+                        errors: valErrors
+                    };
+                }
                 const currentPost = await prisma.post.findUnique({
                     where: {
-                        uuid: args.postId
+                        uuid: postId
                     }
                 });
                 if (currentPost) {
-                    let title = args.title ? args.title : currentPost.title;
-                    let body = args.body ? args.body : currentPost.body;
+                    let postTitle = title ? title : currentPost.title;
+                    let postBody = body ? body : currentPost.body;
                     let post = await prisma.post.update({
                         where: {
-                            uuid: args.postId
+                            uuid: postId
                         },
                         data: {
-                            title,
-                            body,
+                            title: postTitle,
+                            body: postBody,
                         },
                     });
                     if (post) {
@@ -169,8 +208,25 @@ const posts = {
                 };
             }
         },
-        deletePost: async (_, { postId }) => {
+        deletePost: async (_, { postId, userId }, context) => {
             try {
+                let user = await prisma.user.findUnique({ where: { uuid: userId } });
+                if (!user) {
+                    return {
+                        errors: [
+                            {
+                                field: 'user',
+                                message: 'User not found'
+                            }
+                        ]
+                    };
+                }
+                let { valid, valErrors } = auth_1.authCheck(user === null || user === void 0 ? void 0 : user.email, context);
+                if (!valid) {
+                    return {
+                        errors: valErrors
+                    };
+                }
                 const post = await prisma.post.delete({
                     where: {
                         uuid: postId

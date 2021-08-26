@@ -1,21 +1,12 @@
-import { Post, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
+import { authCheck } from '../../utils/auth';
+import { AuthResponse, PostResponse } from '../../types';
 
 
 const prisma = new PrismaClient();
 
 // types //////////////////////
-type PostResponse = {
-    errors?:[FieldErrors] | [] | null
-    data?:Post | null
-    posts?:Post[] | null
-}
-
-type FieldErrors = {
-    field:String
-    message:String
-}
-
 type PostInput = {
     title:string
     body:string
@@ -29,7 +20,11 @@ const posts = {
     Query:{
         getPosts:async():Promise<PostResponse>=>{
             try {
-                const posts = await prisma.post.findMany();
+                const posts = await prisma.post.findMany({
+                    orderBy:{
+                        createdAt:"desc"
+                    }
+                });
 
                 if(posts){
                     return{
@@ -96,9 +91,28 @@ const posts = {
     Mutation:{
         createPost:async(
             _:undefined,
-            {title,body,userId}:PostInput
+            {title,body,userId}:PostInput,
+            context:AuthResponse
         ):Promise<PostResponse>=>{
             try {
+                let user = await prisma.user.findUnique({where:{uuid:userId}});
+                if(!user){
+                    return{
+                        errors:[
+                            {
+                                field:'user',
+                                message:'User not found'
+                            }
+                        ]
+                    }
+                }
+                let { valid, valErrors } = authCheck(user?.email,context);
+                if(!valid){
+                    return{
+                        errors:valErrors
+                    }
+                }
+
                 const post = await prisma.post.create({
                     data:{
                         title,
@@ -139,26 +153,45 @@ const posts = {
         },
         updatePost:async(
             _:undefined,
-            args:PostInput
+            {title,body,postId,userId}:PostInput,
+            context:AuthResponse
         ):Promise<PostResponse>=>{
             try {
+                let user = await prisma.user.findUnique({where:{uuid:userId}});
+                if(!user){
+                    return{
+                        errors:[
+                            {
+                                field:'user',
+                                message:'User not found'
+                            }
+                        ]
+                    }
+                }
+                let { valid, valErrors } = authCheck(user?.email,context);
+                if(!valid){
+                    return{
+                        errors:valErrors
+                    }
+                }
+
                 const currentPost = await prisma.post.findUnique({
                     where:{
-                        uuid:args.postId
+                        uuid:postId
                     }
                 });
                 
                 if(currentPost){
-                    let title = args.title ? args.title : currentPost.title;
-                    let body = args.body ? args.body : currentPost.body;
+                    let postTitle = title ? title : currentPost.title;
+                    let postBody = body ? body : currentPost.body;
 
                     let post = await prisma.post.update({
                         where:{
-                            uuid:args.postId
+                            uuid:postId
                         },
                         data:{
-                            title,
-                            body,
+                            title:postTitle,
+                            body:postBody,
                         },
                     })
                     if(post){
@@ -198,9 +231,29 @@ const posts = {
         },
         deletePost:async(
             _:undefined,
-            {postId}:{postId:string}
+            {postId,userId}:{postId:string,userId:string},
+            context:AuthResponse
         ):Promise<PostResponse> =>{
             try {
+                let user = await prisma.user.findUnique({where:{uuid:userId}});
+                if(!user){
+                    return{
+                        errors:[
+                            {
+                                field:'user',
+                                message:'User not found'
+                            }
+                        ]
+                    }
+                }
+                let { valid, valErrors } = authCheck(user?.email,context);
+                if(!valid){
+                    return{
+                        errors:valErrors
+                    }
+                }
+
+
                 const post = await prisma.post.delete({
                     where:{
                         uuid:postId

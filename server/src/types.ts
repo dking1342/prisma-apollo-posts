@@ -1,4 +1,4 @@
-import { User } from ".prisma/client"
+import { Post, User } from ".prisma/client"
 
 export type ErrorField = {
     field:string
@@ -16,6 +16,12 @@ export type AuthUserDetails = {
 export type AuthResponse = {
     user?:any,
     errors?:ErrorField[] | []
+}
+
+export type PostResponse = {
+    errors?:ErrorField[] | [] | null
+    data?:Post | null
+    posts?:Post[] | null
 }
 
 export type UserInput = {

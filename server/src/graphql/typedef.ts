@@ -64,8 +64,8 @@ const typeDefs = gql`
         updateUser(username:String!,email:String!):UserResponse
         deleteUser(email:String!):UserResponse
         createPost(title:String!,userId:String!,body:String):PostResponse
-        updatePost(title:String!,body:String!,postId:String!):PostResponse
-        deletePost(postId:String!):PostResponse
+        updatePost(title:String!,body:String!,postId:String!,userId:String!):PostResponse
+        deletePost(postId:String!,userId:String!):PostResponse
     }
 `;
 
