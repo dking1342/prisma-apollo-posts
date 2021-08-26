@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { ApolloServer } from 'apollo-server';
 import typeDefs from './graphql/typedef';
 import resolvers from './graphql/resolvers';
+import { isAuth } from './utils/auth';
 
 // dotenv invit
 dotenv.config();
@@ -23,11 +24,17 @@ const main = async () => {
     const server = new ApolloServer({
       typeDefs,
       resolvers,
-      context:({req})=>({req,}),
+      context:({req})=>{
+        let { user, errors } = isAuth(req);
+        return { user, errors }
+        
+      },
     });
 
     // apollo server init
     server.listen({port:GRAPHQL_PORT})
+      .then(({url})=> console.log(`server listening at ${url}`))
+      .catch(err=>console.log(`apollo error: ${err.message}`));
 
     // express server init
     app.listen(PORT,()=>console.log(`server listening on port ${PORT}`));

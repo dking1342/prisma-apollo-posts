@@ -1,24 +1,17 @@
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import argon2 from 'argon2';
 import { randomUUID } from 'crypto';
+import { AuthResponse, UserInput, UserResponse } from '../../types';
+import { authCheck, generateToken } from '../../utils/auth';
+import { verification } from '../../utils/verification';
 
 const prisma = new PrismaClient();
 
 // types ///////////////////
-
 type UserDetails = {
-    name:string;
-    userId:string;
-}
-
-type FieldError = {
-    field:string;
-    message:string;
-}
-
-type UserResponse = {
-    errors?:FieldError[] | [] | null;
-    data?:User | null;
-    users?: User[] | null;
+    username:string;
+    userId?:string;
+    email:string;
 }
 
 const users = {
@@ -59,7 +52,7 @@ const users = {
         },
         getUser:async(
             _:undefined,
-            {userId}:{userId:string}
+            {userId}:{userId:string},
         ):Promise<UserResponse>=>{
             try {
                 let user = await prisma.user.findUnique({
@@ -97,16 +90,33 @@ const users = {
 
     },
     Mutation:{
-        createUser: async (
+        register: async (
             _:undefined,
-            {email,name}:{email:string,name:string},
+            {email,username,password}:UserInput,
         ):Promise<UserResponse> =>{
             try {
+                const isExist = await prisma.user.findUnique({
+                    where:{
+                        email
+                    }
+                })
+
+                let inputs = {email,username,password,isExist:Boolean(isExist)}
+                let { valid, valErrors } = verification(inputs);
+
+                if(!valid){
+                    return{
+                        errors:valErrors
+                    }
+                }
+
+                const hash = await argon2.hash(password);
                 const user = await prisma.user.create({
                     data:{
                         uuid:randomUUID().toString(),
-                        email:email,
-                        name:name,
+                        email,
+                        username:username!,
+                        password:hash,
                         posts:{
                             create:[]
                         }
@@ -114,8 +124,10 @@ const users = {
                 });
 
                 if(user){
+                    let token = generateToken(user);
+                    let registerUser = {...user,token}
                     return{
-                        data:user
+                        data:registerUser
                     }
                 } else {
                     return{
@@ -138,25 +150,93 @@ const users = {
                 }
             }
         },
-        updateUser:async(
+        login:async(
             _:undefined,
-            args:UserDetails
+            {email,password}:UserInput
         ):Promise<UserResponse>=>{
             try {
+                let inputs = {email,password};
+                let { valid, valErrors } = verification(inputs);
+
+                if(!valid){
+                    return{
+                        errors:valErrors
+                    }
+                }
+
+                const user = await prisma.user.findUnique({
+                    where:{
+                        email
+                    }
+                });
+
+                if(!user){
+                    return{
+                        errors:[
+                            {
+                                field:'email',
+                                message:'user does not exist'
+                            }
+                        ]
+                    }
+                }
+
+                const isValidPassword = await argon2.verify(user.password,password);
+                if(!isValidPassword){
+                    return{
+                        errors:[
+                            {
+                                field:'password',
+                                message:'password is incorrect'
+                            }
+                        ]
+                    }
+                }
+                const token = generateToken(user);
+                let loginUser = { ...user, token};
+                return{
+                    data:loginUser
+                }
+
+            } catch (error) {
+                return{
+                    errors:[
+                        {
+                            field:'fetch',
+                            message:error.message
+                        }
+                    ]
+                }
+            }
+        },
+        updateUser:async(
+            _:undefined,
+            args:UserDetails,
+            context:AuthResponse
+        ):Promise<UserResponse>=>{
+            try {
+                let { valid, valErrors } = authCheck(args.email,context);
+                if(!valid){
+                    return{
+                        errors:valErrors
+                    }
+                }
+
+
                 let currentUser = await prisma.user.findUnique({
                     where:{
-                        uuid:args.userId
+                        email:args.email
                     }
                 })
                 if(currentUser){
-                    let name = args.name ? args.name : currentUser.name;
+                    let username = args.username ? args.username : currentUser.username;
 
                     let user = await prisma.user.update({
                         where:{
-                            uuid:args.userId
+                            email:args.email
                         },
                         data:{
-                            name
+                            username
                         }
                     })
 
@@ -186,12 +266,20 @@ const users = {
         },
         deleteUser:async(
             _:undefined,
-            { userId }:{userId:string}
+            { email }:UserDetails,
+            context:AuthResponse
         ):Promise<UserResponse>=>{
             try {
+                let { valid, valErrors } = authCheck(email,context);
+                if(!valid){
+                    return{
+                        errors:valErrors
+                    }
+                }
+
                 const user = await prisma.user.delete({
                     where:{
-                        uuid:userId
+                        email
                     }
                 });
                 return {

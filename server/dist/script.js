@@ -9,6 +9,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const apollo_server_1 = require("apollo-server");
 const typedef_1 = __importDefault(require("./graphql/typedef"));
 const resolvers_1 = __importDefault(require("./graphql/resolvers"));
+const auth_1 = require("./utils/auth");
 dotenv_1.default.config();
 const main = async () => {
     try {
@@ -21,9 +22,14 @@ const main = async () => {
         const server = new apollo_server_1.ApolloServer({
             typeDefs: typedef_1.default,
             resolvers: resolvers_1.default,
-            context: ({ req }) => ({ req, }),
+            context: ({ req }) => {
+                let { user, errors } = auth_1.isAuth(req);
+                return { user, errors };
+            },
         });
-        server.listen({ port: GRAPHQL_PORT });
+        server.listen({ port: GRAPHQL_PORT })
+            .then(({ url }) => console.log(`server listening at ${url}`))
+            .catch(err => console.log(`apollo error: ${err.message}`));
         app.listen(PORT, () => console.log(`server listening on port ${PORT}`));
     }
     catch (error) {

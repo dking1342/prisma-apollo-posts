@@ -20,14 +20,16 @@ const typeDefs = graphql_tag_1.gql `
     }
 
     type User{
-        id:ID
-        uuid:String
+        id:ID!
+        uuid:String!
         email:String!
-        name:String!
-        role:String
+        username:String!
+        password:String!
+        token:String
+        role:String!
         posts:[Post]
-        createdAt:String
-        updatedAt:String
+        createdAt:String!
+        updatedAt:String!
     }
 
     type Post{
@@ -58,9 +60,10 @@ const typeDefs = graphql_tag_1.gql `
     }
 
     type Mutation{
-        createUser(email:String!,name:String!):UserResponse
-        updateUser(name:String!,userId:String!):UserResponse
-        deleteUser(userId:String!):UserResponse
+        register(email:String!,username:String!,password:String!):UserResponse
+        login(email:String!,password:String!):UserResponse
+        updateUser(username:String!,email:String!):UserResponse
+        deleteUser(email:String!):UserResponse
         createPost(title:String!,userId:String!,body:String):PostResponse
         updatePost(title:String!,body:String!,postId:String!):PostResponse
         deletePost(postId:String!):PostResponse
