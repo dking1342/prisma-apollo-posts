@@ -1,8 +1,7 @@
-import { Button, Card, CardActions, CardContent, CardMedia, Container, Grid, LinearProgress, Typography } from '@material-ui/core';
+import { Card, CardActions, CardContent, CardMedia, Container, Grid, LinearProgress, Typography } from '@material-ui/core';
 import React from 'react';
-import { AiFillHeart } from 'react-icons/ai';
 import Buttons from '../components/Buttons';
-import { useGetPostsQuery } from '../generated/graphql';
+import { useGetPostsLazyQuery, useGetPostsQuery } from '../generated/graphql';
 import useAlbumStyles from './../styles/useAlbumStyles';
 
 
@@ -14,6 +13,7 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = () => {
     const classes = useAlbumStyles();
     const {data,loading} = useGetPostsQuery();
+    
 
     return (
         <>

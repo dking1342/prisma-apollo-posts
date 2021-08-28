@@ -38,7 +38,7 @@ const ApolloProvider = ({children}:any) => {
         if (networkError) console.log(`[Network error]: ${networkError}`);
     });
 
-    let cache = new InMemoryCache()
+    let cache = new InMemoryCache();
 
     // apollo client init
     const client = new ApolloClient({
