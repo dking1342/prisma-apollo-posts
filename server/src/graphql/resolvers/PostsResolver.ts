@@ -61,7 +61,7 @@ const posts = {
                         uuid:postId
                     }
                 });
-
+                
                 if(post){
                     return{
                         data:post

@@ -1,0 +1,17 @@
+query GetPosts{
+  getPosts {
+    errors{
+      field
+      message
+    }
+    posts{
+      id
+      uuid
+      title
+      body
+      user_id
+      createdAt
+      updatedAt
+    }
+  }
+}

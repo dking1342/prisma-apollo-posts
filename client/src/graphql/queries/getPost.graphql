@@ -1,0 +1,15 @@
+query GetPost($postId:String!){
+  getPost(postId:$postId){
+    errors{
+      field
+      message
+    }
+    data{
+      id
+      uuid
+      title
+      body
+      user_id
+    }
+  }
+}

@@ -54,9 +54,9 @@ const typeDefs = graphql_tag_1.gql `
 
     type Query{
         getUsers:UserResponse
-        getUser(userId:String):UserResponse
+        getUser(userId:String!):UserResponse
         getPosts:PostResponse
-        getPost(postId:String):PostResponse
+        getPost(postId:String!):PostResponse
     }
 
     type Mutation{
