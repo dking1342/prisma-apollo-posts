@@ -70,7 +70,7 @@ const Home: React.FC<HomeProps> = () => {
                                         image='https://source.unsplash.com/random'
                                         title='Image title'
                                     />
-                                    <Grid container className={classes.cardLike}>
+                                    {/* <Grid container className={classes.cardLike}>
                                         <Grid item>
                                             <Button disableRipple>
                                                 <AiFillHeart color="red" />
@@ -79,7 +79,7 @@ const Home: React.FC<HomeProps> = () => {
                                         <Grid item>
                                             0 likes
                                         </Grid>
-                                    </Grid>
+                                    </Grid> */}
                                     <CardContent
                                         className={classes.cardContent}
                                     >

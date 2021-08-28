@@ -1,0 +1,17 @@
+mutation CreatePost($title:String!,$body:String,$userId:String!){
+  createPost(title:$title,body:$body,userId:$userId){
+    errors{
+      field
+      message
+    }
+    data{
+      id
+      uuid
+      title
+      body
+      user_id
+      createdAt
+      updatedAt
+    }
+  }
+}

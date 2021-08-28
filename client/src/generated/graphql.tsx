@@ -143,6 +143,23 @@ export type UserResponse = {
   users?: Maybe<Array<Maybe<User>>>;
 };
 
+export type CreatePostMutationVariables = Exact<{
+  title: Scalars['String'];
+  body?: Maybe<Scalars['String']>;
+  userId: Scalars['String'];
+}>;
+
+
+export type CreatePostMutation = { __typename?: 'Mutation', createPost?: Maybe<{ __typename?: 'PostResponse', errors?: Maybe<Array<Maybe<{ __typename?: 'FieldErrors', field: string, message: string }>>>, data?: Maybe<{ __typename?: 'Post', id: number, uuid: string, title: string, body?: Maybe<string>, user_id?: Maybe<string>, createdAt: string, updatedAt: string }> }> };
+
+export type DeletePostMutationVariables = Exact<{
+  postId: Scalars['String'];
+  userId: Scalars['String'];
+}>;
+
+
+export type DeletePostMutation = { __typename?: 'Mutation', deletePost?: Maybe<{ __typename?: 'PostResponse', errors?: Maybe<Array<Maybe<{ __typename?: 'FieldErrors', field: string, message: string }>>>, data?: Maybe<{ __typename?: 'Post', id: number, uuid: string, title: string, body?: Maybe<string> }> }> };
+
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -182,7 +199,104 @@ export type GetPostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetPostsQuery = { __typename?: 'Query', getPosts?: Maybe<{ __typename?: 'PostResponse', errors?: Maybe<Array<Maybe<{ __typename?: 'FieldErrors', field: string, message: string }>>>, posts?: Maybe<Array<Maybe<{ __typename?: 'Post', id: number, uuid: string, title: string, body?: Maybe<string>, user_id?: Maybe<string>, createdAt: string, updatedAt: string }>>> }> };
 
+export type GetUserQueryVariables = Exact<{
+  userId: Scalars['String'];
+}>;
 
+
+export type GetUserQuery = { __typename?: 'Query', getUser?: Maybe<{ __typename?: 'UserResponse', errors?: Maybe<Array<Maybe<{ __typename?: 'FieldErrors', field: string, message: string }>>>, data?: Maybe<{ __typename?: 'User', id: string, uuid: string, email: string, username: string, createdAt: string, updatedAt: string, posts?: Maybe<Array<Maybe<{ __typename?: 'Post', id: number, title: string, body?: Maybe<string> }>>> }> }> };
+
+
+export const CreatePostDocument = gql`
+    mutation CreatePost($title: String!, $body: String, $userId: String!) {
+  createPost(title: $title, body: $body, userId: $userId) {
+    errors {
+      field
+      message
+    }
+    data {
+      id
+      uuid
+      title
+      body
+      user_id
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+
+/**
+ * __useCreatePostMutation__
+ *
+ * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ *   variables: {
+ *      title: // value for 'title'
+ *      body: // value for 'body'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
+      }
+export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
+export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
+export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const DeletePostDocument = gql`
+    mutation DeletePost($postId: String!, $userId: String!) {
+  deletePost(postId: $postId, userId: $userId) {
+    errors {
+      field
+      message
+    }
+    data {
+      id
+      uuid
+      title
+      body
+    }
+  }
+}
+    `;
+export type DeletePostMutationFn = Apollo.MutationFunction<DeletePostMutation, DeletePostMutationVariables>;
+
+/**
+ * __useDeletePostMutation__
+ *
+ * To run a mutation, you first call `useDeletePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePostMutation, { data, loading, error }] = useDeletePostMutation({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useDeletePostMutation(baseOptions?: Apollo.MutationHookOptions<DeletePostMutation, DeletePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePostMutation, DeletePostMutationVariables>(DeletePostDocument, options);
+      }
+export type DeletePostMutationHookResult = ReturnType<typeof useDeletePostMutation>;
+export type DeletePostMutationResult = Apollo.MutationResult<DeletePostMutation>;
+export type DeletePostMutationOptions = Apollo.BaseMutationOptions<DeletePostMutation, DeletePostMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
@@ -415,3 +529,54 @@ export function useGetPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<G
 export type GetPostsQueryHookResult = ReturnType<typeof useGetPostsQuery>;
 export type GetPostsLazyQueryHookResult = ReturnType<typeof useGetPostsLazyQuery>;
 export type GetPostsQueryResult = Apollo.QueryResult<GetPostsQuery, GetPostsQueryVariables>;
+export const GetUserDocument = gql`
+    query GetUser($userId: String!) {
+  getUser(userId: $userId) {
+    errors {
+      field
+      message
+    }
+    data {
+      id
+      uuid
+      email
+      username
+      posts {
+        id
+        title
+        body
+      }
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetUserQuery__
+ *
+ * To run a query within a React component, call `useGetUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useGetUserQuery(baseOptions: Apollo.QueryHookOptions<GetUserQuery, GetUserQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUserQuery, GetUserQueryVariables>(GetUserDocument, options);
+      }
+export function useGetUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserQuery, GetUserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUserQuery, GetUserQueryVariables>(GetUserDocument, options);
+        }
+export type GetUserQueryHookResult = ReturnType<typeof useGetUserQuery>;
+export type GetUserLazyQueryHookResult = ReturnType<typeof useGetUserLazyQuery>;
+export type GetUserQueryResult = Apollo.QueryResult<GetUserQuery, GetUserQueryVariables>;

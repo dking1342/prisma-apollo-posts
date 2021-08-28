@@ -1,0 +1,14 @@
+mutation DeletePost($postId:String!,$userId:String!){
+  deletePost(postId:$postId,userId:$userId){
+    errors{
+      field
+      message
+    }
+    data{
+      id
+      uuid
+      title
+      body
+    }
+  }
+}

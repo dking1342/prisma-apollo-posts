@@ -14,6 +14,7 @@ interface RegisterProps {
 
 const Register: React.FC<RegisterProps> = () => {
     const classes = useSigninStyles();
+    const userId = localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')!) : '';
     const history = useHistory();
     const initialState = {
         email:'',
@@ -32,6 +33,10 @@ const Register: React.FC<RegisterProps> = () => {
     });
 
     const [fieldErrors,setFieldErrors]=useState<FieldErrors[] | null >([]);
+
+    if(userId){
+        history.goBack();
+    }
 
     return (
         <section className={classes.sectionContainer}>
